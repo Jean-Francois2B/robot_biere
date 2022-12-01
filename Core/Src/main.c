@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -96,6 +97,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
 	xl320.serial.transmit = uart_half_duplex_transmit;
 	xl320.serial.receive  = uart_half_duplex_receive;
@@ -118,6 +120,7 @@ int main(void)
 		xl320_setGoalPosition(&xl320, 0);
 		xl320_executeAction(&xl320);
 		HAL_Delay(2000);
+
 
 
 		/*
