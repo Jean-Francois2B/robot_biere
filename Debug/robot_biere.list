@@ -7,43 +7,43 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         00008714  080000c0  080000c0  000100c0  2**4
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       000008bc  080087d4  080087d4  000187d4  2**2
+  2 .rodata       000008dc  080087d4  080087d4  000187d4  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  08009090  08009090  00020074  2**0
+  3 .ARM.extab    00000000  080090b0  080090b0  00020074  2**0
                   CONTENTS
-  4 .ARM          00000000  08009090  08009090  00020074  2**0
+  4 .ARM          00000000  080090b0  080090b0  00020074  2**0
                   CONTENTS
-  5 .preinit_array 00000000  08009090  08009090  00020074  2**0
+  5 .preinit_array 00000000  080090b0  080090b0  00020074  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  08009090  08009090  00019090  2**2
+  6 .init_array   00000004  080090b0  080090b0  000190b0  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  08009094  08009094  00019094  2**2
+  7 .fini_array   00000004  080090b4  080090b4  000190b4  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         00000074  20000000  08009098  00020000  2**2
+  8 .data         00000074  20000000  080090b8  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          000012c4  20000074  0800910c  00020074  2**2
+  9 .bss          000012c4  20000074  0800912c  00020074  2**2
                   ALLOC
- 10 ._user_heap_stack 00000600  20001338  0800910c  00021338  2**0
+ 10 ._user_heap_stack 00000600  20001338  0800912c  00021338  2**0
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  00020074  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00016ae0  00000000  00000000  0002009c  2**0
+ 12 .debug_info   00016b41  00000000  00000000  0002009c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 0000384f  00000000  00000000  00036b7c  2**0
+ 13 .debug_abbrev 0000384f  00000000  00000000  00036bdd  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 000014e8  00000000  00000000  0003a3d0  2**3
+ 14 .debug_aranges 000014f0  00000000  00000000  0003a430  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 00001350  00000000  00000000  0003b8b8  2**3
+ 15 .debug_ranges 00001358  00000000  00000000  0003b920  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00018dce  00000000  00000000  0003cc08  2**0
+ 16 .debug_macro  00018dce  00000000  00000000  0003cc78  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001938b  00000000  00000000  000559d6  2**0
+ 17 .debug_line   000193b9  00000000  00000000  00055a46  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00097c2f  00000000  00000000  0006ed61  2**0
+ 18 .debug_str    00097c49  00000000  00000000  0006edff  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  00106990  2**0
+ 19 .comment      00000050  00000000  00000000  00106a48  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000055b4  00000000  00000000  001069e0  2**2
+ 20 .debug_frame  000055d4  00000000  00000000  00106a98  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -958,7 +958,7 @@ Disassembly of section .text:
  80007ce:	46c0      	nop			; (mov r8, r8)
  80007d0:	000007ff 	.word	0x000007ff
  80007d4:	fffffc01 	.word	0xfffffc01
- 80007d8:	08008edc 	.word	0x08008edc
+ 80007d8:	08008efc 	.word	0x08008efc
  80007dc:	000003ff 	.word	0x000003ff
  80007e0:	feffffff 	.word	0xfeffffff
  80007e4:	000007fe 	.word	0x000007fe
@@ -2852,10 +2852,10 @@ int __io_putchar(int ch)
  800163c:	200004a8 	.word	0x200004a8
 
 08001640 <taskServoMoteur.0>:
-  MX_TIM16_Init();
-  /* USER CODE BEGIN 2 */
 	xl320.serial.transmit = uart_half_duplex_transmit;
 	xl320.serial.receive  = uart_half_duplex_receive;
+
+	sh_init(&shell);
 
 	void taskServoMoteur(void * unused){
  8001640:	b580      	push	{r7, lr}
@@ -2974,36 +2974,35 @@ int main(void)
  8001716:	4b13      	ldr	r3, [pc, #76]	; (8001764 <main+0xac>)
  8001718:	4a14      	ldr	r2, [pc, #80]	; (800176c <main+0xb4>)
  800171a:	609a      	str	r2, [r3, #8]
+	sh_init(&shell);
+ 800171c:	4b14      	ldr	r3, [pc, #80]	; (8001770 <main+0xb8>)
+ 800171e:	0018      	movs	r0, r3
+ 8001720:	f000 f8e6 	bl	80018f0 <sh_init>
 		}
 	}
 
 	if (xTaskCreate(taskServoMoteur, "Tâche Servo moteur", STACK_DEPTH, NULL, 3, NULL) != pdTRUE){
- 800171c:	003b      	movs	r3, r7
- 800171e:	2201      	movs	r2, #1
- 8001720:	4313      	orrs	r3, r2
- 8001722:	0018      	movs	r0, r3
- 8001724:	23fa      	movs	r3, #250	; 0xfa
- 8001726:	005a      	lsls	r2, r3, #1
- 8001728:	4911      	ldr	r1, [pc, #68]	; (8001770 <main+0xb8>)
- 800172a:	2300      	movs	r3, #0
- 800172c:	9301      	str	r3, [sp, #4]
- 800172e:	2303      	movs	r3, #3
- 8001730:	9300      	str	r3, [sp, #0]
+ 8001724:	003b      	movs	r3, r7
+ 8001726:	2201      	movs	r2, #1
+ 8001728:	4313      	orrs	r3, r2
+ 800172a:	0018      	movs	r0, r3
+ 800172c:	23fa      	movs	r3, #250	; 0xfa
+ 800172e:	005a      	lsls	r2, r3, #1
+ 8001730:	4910      	ldr	r1, [pc, #64]	; (8001774 <main+0xbc>)
  8001732:	2300      	movs	r3, #0
- 8001734:	f004 fb8e 	bl	8005e54 <xTaskCreate>
- 8001738:	0003      	movs	r3, r0
- 800173a:	2b01      	cmp	r3, #1
- 800173c:	d003      	beq.n	8001746 <main+0x8e>
+ 8001734:	9301      	str	r3, [sp, #4]
+ 8001736:	2303      	movs	r3, #3
+ 8001738:	9300      	str	r3, [sp, #0]
+ 800173a:	2300      	movs	r3, #0
+ 800173c:	f004 fb8a 	bl	8005e54 <xTaskCreate>
+ 8001740:	0003      	movs	r3, r0
+ 8001742:	2b01      	cmp	r3, #1
+ 8001744:	d003      	beq.n	800174e <main+0x96>
 		printf("TaskServoMoteur not created");
- 800173e:	4b0d      	ldr	r3, [pc, #52]	; (8001774 <main+0xbc>)
- 8001740:	0018      	movs	r0, r3
- 8001742:	f005 fec1 	bl	80074c8 <iprintf>
-	}
-
-	sh_init(&shell);
  8001746:	4b0c      	ldr	r3, [pc, #48]	; (8001778 <main+0xc0>)
  8001748:	0018      	movs	r0, r3
- 800174a:	f000 f8d1 	bl	80018f0 <sh_init>
+ 800174a:	f005 febd 	bl	80074c8 <iprintf>
+	}
 
 
 	vTaskStartScheduler();
@@ -3029,9 +3028,9 @@ int main(void)
  8001764:	20000094 	.word	0x20000094
  8001768:	0800217d 	.word	0x0800217d
  800176c:	080021b5 	.word	0x080021b5
- 8001770:	08008808 	.word	0x08008808
- 8001774:	0800881c 	.word	0x0800881c
- 8001778:	200000a0 	.word	0x200000a0
+ 8001770:	200000a0 	.word	0x200000a0
+ 8001774:	08008808 	.word	0x08008808
+ 8001778:	0800881c 	.word	0x0800881c
 
 0800177c <SystemClock_Config>:
 /**
@@ -6041,7 +6040,7 @@ LoopForever:
   ldr r1, =_edata
  80028ac:	20000074 	.word	0x20000074
   ldr r2, =_sidata
- 80028b0:	08009098 	.word	0x08009098
+ 80028b0:	080090b8 	.word	0x080090b8
   ldr r2, =_sbss
  80028b4:	20000074 	.word	0x20000074
   ldr r4, =_ebss
@@ -8645,7 +8644,7 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, ui
  80036ac:	40021000 	.word	0x40021000
  80036b0:	fffff0ff 	.word	0xfffff0ff
  80036b4:	ffff8fff 	.word	0xffff8fff
- 80036b8:	08008f1c 	.word	0x08008f1c
+ 80036b8:	08008f3c 	.word	0x08008f3c
  80036bc:	20000000 	.word	0x20000000
  80036c0:	20000004 	.word	0x20000004
 
@@ -8883,7 +8882,7 @@ uint32_t HAL_RCC_GetPCLK1Freq(void)
  80037fe:	46bd      	mov	sp, r7
  8003800:	bdb0      	pop	{r4, r5, r7, pc}
  8003802:	46c0      	nop			; (mov r8, r8)
- 8003804:	08008f5c 	.word	0x08008f5c
+ 8003804:	08008f7c 	.word	0x08008f7c
 
 08003808 <HAL_RCCEx_PeriphCLKConfig>:
   *         the RTC clock source: in this case the access to Backup domain is enabled.
@@ -10386,7 +10385,7 @@ HAL_StatusTypeDef HAL_TIM_PWM_ConfigChannel(TIM_HandleTypeDef *htim,
  8003fca:	b006      	add	sp, #24
  8003fcc:	bd80      	pop	{r7, pc}
  8003fce:	46c0      	nop			; (mov r8, r8)
- 8003fd0:	08008f7c 	.word	0x08008f7c
+ 8003fd0:	08008f9c 	.word	0x08008f9c
  8003fd4:	fffffbff 	.word	0xfffffbff
 
 08003fd8 <HAL_TIM_ConfigClockSource>:
@@ -14538,7 +14537,7 @@ HAL_StatusTypeDef UART_SetConfig(UART_HandleTypeDef *huart)
  8005670:	40004800 	.word	0x40004800
  8005674:	40004c00 	.word	0x40004c00
  8005678:	00f42400 	.word	0x00f42400
- 800567c:	08008fd0 	.word	0x08008fd0
+ 800567c:	08008ff0 	.word	0x08008ff0
 
 08005680 <UART_AdvFeatureConfig>:
   * @brief Configure the UART peripheral advanced features.
@@ -15595,8 +15594,8 @@ static void UARTEx_SetNbDataToProcess(UART_HandleTypeDef *huart)
  8005c3a:	b005      	add	sp, #20
  8005c3c:	bdf0      	pop	{r4, r5, r6, r7, pc}
  8005c3e:	46c0      	nop			; (mov r8, r8)
- 8005c40:	08008fe8 	.word	0x08008fe8
- 8005c44:	08008ff0 	.word	0x08008ff0
+ 8005c40:	08009008 	.word	0x08009008
+ 8005c44:	08009010 	.word	0x08009010
 
 08005c48 <makeFreeRtosPriority>:
 
@@ -16951,7 +16950,7 @@ void vTaskStartScheduler( void )
  8006246:	b002      	add	sp, #8
  8006248:	bd80      	pop	{r7, pc}
  800624a:	46c0      	nop			; (mov r8, r8)
- 800624c:	08008eac 	.word	0x08008eac
+ 800624c:	08008ecc 	.word	0x08008ecc
  8006250:	08006741 	.word	0x08006741
  8006254:	200006f8 	.word	0x200006f8
  8006258:	200006f4 	.word	0x200006f4
@@ -18800,8 +18799,8 @@ TCB_t *pxTCB;
  8006be8:	bd80      	pop	{r7, pc}
  8006bea:	46c0      	nop			; (mov r8, r8)
  8006bec:	200006d4 	.word	0x200006d4
- 8006bf0:	08008ec4 	.word	0x08008ec4
- 8006bf4:	08008ed0 	.word	0x08008ed0
+ 8006bf0:	08008ee4 	.word	0x08008ee4
+ 8006bf4:	08008ef0 	.word	0x08008ef0
 
 08006bf8 <prvAddCurrentTaskToDelayedList>:
 
@@ -20124,10 +20123,10 @@ uint8_t *puc;
  80072a2:	4798      	blx	r3
  80072a4:	3601      	adds	r6, #1
  80072a6:	e7f2      	b.n	800728e <__libc_init_array+0x1e>
- 80072a8:	08009090 	.word	0x08009090
- 80072ac:	08009090 	.word	0x08009090
- 80072b0:	08009090 	.word	0x08009090
- 80072b4:	08009094 	.word	0x08009094
+ 80072a8:	080090b0 	.word	0x080090b0
+ 80072ac:	080090b0 	.word	0x080090b0
+ 80072b0:	080090b0 	.word	0x080090b0
+ 80072b4:	080090b4 	.word	0x080090b4
 
 080072b8 <malloc>:
  80072b8:	b510      	push	{r4, lr}
@@ -20516,9 +20515,9 @@ uint8_t *puc;
  80075ce:	6022      	str	r2, [r4, #0]
  80075d0:	701d      	strb	r5, [r3, #0]
  80075d2:	e7bf      	b.n	8007554 <_puts_r+0x58>
- 80075d4:	0800901c 	.word	0x0800901c
- 80075d8:	0800903c 	.word	0x0800903c
- 80075dc:	08008ffc 	.word	0x08008ffc
+ 80075d4:	0800903c 	.word	0x0800903c
+ 80075d8:	0800905c 	.word	0x0800905c
+ 80075dc:	0800901c 	.word	0x0800901c
 
 080075e0 <puts>:
  80075e0:	b510      	push	{r4, lr}
@@ -20717,9 +20716,9 @@ uint8_t *puc;
  800776a:	2601      	movs	r6, #1
  800776c:	4276      	negs	r6, r6
  800776e:	e7ea      	b.n	8007746 <__swbuf_r+0x76>
- 8007770:	0800901c 	.word	0x0800901c
- 8007774:	0800903c 	.word	0x0800903c
- 8007778:	08008ffc 	.word	0x08008ffc
+ 8007770:	0800903c 	.word	0x0800903c
+ 8007774:	0800905c 	.word	0x0800905c
+ 8007778:	0800901c 	.word	0x0800901c
 
 0800777c <__swsetup_r>:
  800777c:	4b37      	ldr	r3, [pc, #220]	; (800785c <__swsetup_r+0xe0>)
@@ -20832,9 +20831,9 @@ uint8_t *puc;
  8007858:	60a2      	str	r2, [r4, #8]
  800785a:	e7ef      	b.n	800783c <__swsetup_r+0xc0>
  800785c:	20000010 	.word	0x20000010
- 8007860:	0800901c 	.word	0x0800901c
- 8007864:	0800903c 	.word	0x0800903c
- 8007868:	08008ffc 	.word	0x08008ffc
+ 8007860:	0800903c 	.word	0x0800903c
+ 8007864:	0800905c 	.word	0x0800905c
+ 8007868:	0800901c 	.word	0x0800901c
 
 0800786c <__sflush_r>:
  800786c:	b5f7      	push	{r0, r1, r2, r4, r5, r6, r7, lr}
@@ -21031,9 +21030,9 @@ uint8_t *puc;
  80079f2:	68ec      	ldr	r4, [r5, #12]
  80079f4:	e7da      	b.n	80079ac <_fflush_r+0x28>
  80079f6:	46c0      	nop			; (mov r8, r8)
- 80079f8:	0800901c 	.word	0x0800901c
- 80079fc:	0800903c 	.word	0x0800903c
- 8007a00:	08008ffc 	.word	0x08008ffc
+ 80079f8:	0800903c 	.word	0x0800903c
+ 80079fc:	0800905c 	.word	0x0800905c
+ 8007a00:	0800901c 	.word	0x0800901c
 
 08007a04 <std>:
  8007a04:	2300      	movs	r3, #0
@@ -21175,7 +21174,7 @@ uint8_t *puc;
  8007b2a:	2301      	movs	r3, #1
  8007b2c:	61a3      	str	r3, [r4, #24]
  8007b2e:	e7d2      	b.n	8007ad6 <__sinit+0xe>
- 8007b30:	08008ff8 	.word	0x08008ff8
+ 8007b30:	08009018 	.word	0x08009018
  8007b34:	08007a4d 	.word	0x08007a4d
 
 08007b38 <__sfp>:
@@ -21240,7 +21239,7 @@ uint8_t *puc;
  8007bba:	603b      	str	r3, [r7, #0]
  8007bbc:	e7ef      	b.n	8007b9e <__sfp+0x66>
  8007bbe:	46c0      	nop			; (mov r8, r8)
- 8007bc0:	08008ff8 	.word	0x08008ff8
+ 8007bc0:	08009018 	.word	0x08009018
  8007bc4:	ffff0001 	.word	0xffff0001
 
 08007bc8 <_fwalk_reent>:
@@ -21744,9 +21743,9 @@ uint8_t *puc;
  8007fb0:	f000 f9de 	bl	8008370 <_printf_i>
  8007fb4:	e7ea      	b.n	8007f8c <_svfiprintf_r+0x1c0>
  8007fb6:	46c0      	nop			; (mov r8, r8)
- 8007fb8:	0800905c 	.word	0x0800905c
- 8007fbc:	08009062 	.word	0x08009062
- 8007fc0:	08009066 	.word	0x08009066
+ 8007fb8:	0800907c 	.word	0x0800907c
+ 8007fbc:	08009082 	.word	0x08009082
+ 8007fc0:	08009086 	.word	0x08009086
  8007fc4:	00000000 	.word	0x00000000
  8007fc8:	08007d09 	.word	0x08007d09
 
@@ -22081,12 +22080,12 @@ uint8_t *puc;
  8008268:	f000 f882 	bl	8008370 <_printf_i>
  800826c:	e7e3      	b.n	8008236 <_vfiprintf_r+0x21a>
  800826e:	46c0      	nop			; (mov r8, r8)
- 8008270:	0800901c 	.word	0x0800901c
- 8008274:	0800903c 	.word	0x0800903c
- 8008278:	08008ffc 	.word	0x08008ffc
- 800827c:	0800905c 	.word	0x0800905c
- 8008280:	08009062 	.word	0x08009062
- 8008284:	08009066 	.word	0x08009066
+ 8008270:	0800903c 	.word	0x0800903c
+ 8008274:	0800905c 	.word	0x0800905c
+ 8008278:	0800901c 	.word	0x0800901c
+ 800827c:	0800907c 	.word	0x0800907c
+ 8008280:	08009082 	.word	0x08009082
+ 8008284:	08009086 	.word	0x08009086
  8008288:	00000000 	.word	0x00000000
  800828c:	08007ff7 	.word	0x08007ff7
 
@@ -22461,8 +22460,8 @@ uint8_t *puc;
  8008586:	e7e9      	b.n	800855c <_printf_i+0x1ec>
  8008588:	2500      	movs	r5, #0
  800858a:	e7f7      	b.n	800857c <_printf_i+0x20c>
- 800858c:	0800906d 	.word	0x0800906d
- 8008590:	0800907e 	.word	0x0800907e
+ 800858c:	0800908d 	.word	0x0800908d
+ 8008590:	0800909e 	.word	0x0800909e
 
 08008594 <__sread>:
  8008594:	b570      	push	{r4, r5, r6, lr}

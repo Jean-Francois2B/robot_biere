@@ -224,6 +224,24 @@ int xl320_torqueEnable(XL320_t* xl320){
 }
 
 
+int xl320_readCurrent(XL320_t* xl320){
+	char rxBuff[BUFFER_SIZE] = {0};
+
+	uint8_t params[2] = {CURRENT, 0};
+
+	xl320_sendCommand(xl320, READ, 2, (uint8_t*) &params);
+	xl320_receiveCommand(xl320, (uint8_t*) &rxBuff);
+
+	if (rxBuff[10] == 1){
+
+		printf("Current : + A");
+	}
+	else{
+		printf("Current : - A");
+	}
+
+	return 0;
+}
 
 
 

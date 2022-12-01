@@ -109,6 +109,8 @@ int main(void)
 	xl320.serial.transmit = uart_half_duplex_transmit;
 	xl320.serial.receive  = uart_half_duplex_receive;
 
+	sh_init(&shell);
+
 	void taskServoMoteur(void * unused){
 		xl320_init(&xl320, 1, BR_1M);
 		xl320_setSpeed(&xl320, 20);
@@ -128,8 +130,6 @@ int main(void)
 	if (xTaskCreate(taskServoMoteur, "Tâche Servo moteur", STACK_DEPTH, NULL, 3, NULL) != pdTRUE){
 		printf("TaskServoMoteur not created");
 	}
-
-	sh_init(&shell);
 
 
 	vTaskStartScheduler();

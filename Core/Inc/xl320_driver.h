@@ -90,7 +90,8 @@ typedef enum xl320_register_struct{
 	TORQUE_EN 	= 	0x18,
 	LED 		= 	0x19,
 	POSITION 	= 	0x1E,
-	SPEED 		= 	0x20
+	SPEED 		= 	0x20,
+	CURRENT		=	0x29
 }XL320_Register_t;
 
 
@@ -233,6 +234,8 @@ int xl320_executeAction(XL320_t* xl320);
 int xl320_torqueEnable(XL320_t* xl320);
 
 int xl320_setSpeed(XL320_t* xl320, float rpm);
+
+int xl320_readCurrent(XL320_t* xl320);
 
 int xl320_blinbling(XL320_t* xl320);
 
