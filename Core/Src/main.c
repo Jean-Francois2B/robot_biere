@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -26,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "xl320_driver.h"
+#include "shell.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,10 +48,12 @@
 
 /* USER CODE BEGIN PV */
 XL320_t xl320;
+h_shell_t shell;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -98,35 +102,52 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_TIM14_Init();
+  MX_TIM3_Init();
+  MX_TIM15_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
 	xl320.serial.transmit = uart_half_duplex_transmit;
 	xl320.serial.receive  = uart_half_duplex_receive;
 
-	xl320_init(&xl320, 1, BR_1M);
-	xl320_setSpeed(&xl320, 20);
-	xl320_torqueEnable(&xl320);
-	HAL_Delay(250);
+	void taskServoMoteur(void * unused){
+		xl320_init(&xl320, 1, BR_1M);
+		xl320_setSpeed(&xl320, 20);
+		xl320_torqueEnable(&xl320);
+		vTaskDelay(250);
+
+		for(;;){
+			xl320_setGoalPosition(&xl320, 20);
+			xl320_executeAction(&xl320);
+			vTaskDelay(2000);
+			xl320_setGoalPosition(&xl320, 0);
+			xl320_executeAction(&xl320);
+			vTaskDelay(2000);
+		}
+	}
+
+	if (xTaskCreate(taskServoMoteur, "Tâche Servo moteur", STACK_DEPTH, NULL, 3, NULL) != pdTRUE){
+		printf("TaskServoMoteur not created");
+	}
+
+	sh_init(&shell);
+
+
+	vTaskStartScheduler();
+
   /* USER CODE END 2 */
 
+  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
 
-
-		xl320_setGoalPosition(&xl320, 75);
-		xl320_executeAction(&xl320);
-		HAL_Delay(2000);
-		xl320_setGoalPosition(&xl320, 0);
-		xl320_executeAction(&xl320);
-		HAL_Delay(2000);
-
-
-
-		/*
-		xl320_ping(&xl320);
-		HAL_Delay(2000);
-		*/
 
     /* USER CODE END WHILE */
 

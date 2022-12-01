@@ -33,11 +33,9 @@
 #define BIT_RESOLUTION_IN_DEG 	0.29
 #define RESOLUTION_SPEED 		0.111
 #define LIMIT_SPEED 			114
-
 #define GATE_CLOSED 			69
-
-#define BUFFER_SIZE				14
-
+#define BUFFER_SIZE				64
+#define TIMEOUT					0x1F4
 
 /*
  * FRAME SIZE

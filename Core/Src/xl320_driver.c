@@ -102,7 +102,7 @@ int xl320_sendCommand(XL320_t* xl320, XL320_Instruction_t inst, uint16_t nbParam
 }
 
 int xl320_receiveCommand(XL320_t* xl320, uint8_t* rxBuff){
-	xl320->serial.receive(rxBuff, BUFFER_SIZE, 0x1F4);
+	xl320->serial.receive(rxBuff, BUFFER_SIZE, TIMEOUT);
 
 	return 0;
 }
@@ -222,6 +222,9 @@ int xl320_torqueEnable(XL320_t* xl320){
 
 	return 0;
 }
+
+
+
 
 
 int xl320_blinbling(XL320_t* xl320){

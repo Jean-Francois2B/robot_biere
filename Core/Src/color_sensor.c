@@ -14,7 +14,7 @@
 
 extern UART_HandleTypeDef huart1;		// UART de debug
 extern TIM_HandleTypeDef htim14;			//<! Timer en imput capture
-//extern TIM_HandleTypeDef htim3;			//<! Timer de gestion des filtres
+extern TIM_HandleTypeDef htim3;			//<! Timer de gestion des filtres
 
 uint32_t color_tab[2];
 int color			= 0;
@@ -33,22 +33,22 @@ void color_setOutputFreqScaling(h_color_sensor_t * h_color_sensor){
 		case 4:
 			// 100%
 			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,1);
-			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,1);
+			//GPIO_write(color_S0_GPIO_Port,color_S0_Pin,1);
 			break;
 		case 3:
 			// 20%
 			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,1);
-			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,0);
+			//GPIO_write(color_S0_GPIO_Port,color_S0_Pin,0);
 			break;
 		case 2:
 			// 2%
 			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,0);
-			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,1);
+			//GPIO_write(color_S0_GPIO_Port,color_S0_Pin,1);
 			break;
 		case 1:
 			// Power_down
 			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,0);
-			GPIO_write(color_S0_GPIO_Port,color_S0_Pin,0);
+			//GPIO_write(color_S0_GPIO_Port,color_S0_Pin,0);
 			break;
 	}
 }
@@ -180,7 +180,7 @@ void color_analyse(void){
 	else {
 		printf("c'est vert\r\n");
 	}
-	//HAL_TIM_Base_Stop(&htim3);
+	HAL_TIM_Base_Stop(&htim3);
 	//color_Disable();
 }
 
