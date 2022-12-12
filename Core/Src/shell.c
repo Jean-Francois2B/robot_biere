@@ -17,7 +17,7 @@ static int sh_uartWrite(h_shell_t* shell, char * s, uint16_t size) {
 }
 
 int sh_stats(h_shell_t* shell, int argc, char ** argv){
-	vTaskGetRunTimeStats((char*) &g_statistics);
+	//vTaskGetRunTimeStats((char*) &g_statistics);
 	printf("%s", g_statistics);
 	return 0;
 }
@@ -160,5 +160,6 @@ void configureTimerForRunTimeStats(void){
 
 }
 unsigned long getRunTimeCounterValue(void){
-	//return 0;
+	return 0;
+
 }

@@ -37,6 +37,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define STACK_SERVO_SIZE			256
+#define STACK_MOTOR_SIZE			256
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,6 +51,16 @@
 /* USER CODE BEGIN PV */
 XL320_t xl320;
 h_shell_t shell;
+
+TaskHandle_t h_taskMoteur = NULL;
+TaskHandle_t h_taskServoMoteur = NULL;
+
+SemaphoreHandle_t sem_taskServo = NULL;
+SemaphoreHandle_t sem_taskMoteur = NULL;
+SemaphoreHandle_t sem_taskAsserv = NULL;
+SemaphoreHandle_t sem_taskSensorTof = NULL;
+SemaphoreHandle_t sem_taskSensorColor = NULL;
+SemaphoreHandle_t sem_taskSync = NULL;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,6 +77,7 @@ int __io_putchar(int ch)
 	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
 	return ch;
 }
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 
@@ -72,128 +85,169 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
+	/* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+	/* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+	/* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* USER CODE BEGIN Init */
+	/* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+	/* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* Configure the system clock */
+	SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+	/* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+	/* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  MX_TIM14_Init();
-  MX_TIM3_Init();
-  MX_TIM15_Init();
-  MX_TIM16_Init();
-  /* USER CODE BEGIN 2 */
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_USART1_UART_Init();
+	MX_USART2_UART_Init();
+	MX_TIM14_Init();
+	MX_TIM3_Init();
+	MX_TIM15_Init();
+	MX_TIM16_Init();
+	MX_TIM1_Init();
+	MX_TIM7_Init();
+	/* USER CODE BEGIN 2 */
+	HAL_TIM_Base_Start_IT(&htim7);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+
 	xl320.serial.transmit = uart_half_duplex_transmit;
 	xl320.serial.receive  = uart_half_duplex_receive;
 
-	sh_init(&shell);
+	sem_taskServo = xSemaphoreCreateBinary();
+	sem_taskAsserv = xSemaphoreCreateBinary();
+	sem_taskMoteur = xSemaphoreCreateBinary();
+	sem_taskSensorColor = xSemaphoreCreateBinary();
+	sem_taskSensorTof = xSemaphoreCreateBinary();
+	sem_taskSync = xSemaphoreCreateBinary();
+
+	// Initialisation du shell
+
+	//sh_init(&shell);
+
+	// Initialisation du Servo Moteur
+
+	xl320_init(&xl320, 1, BR_1M);
+	xl320_setSpeed(&xl320, 20);
+	xl320_torqueEnable(&xl320);
+
+	// Tâche du ServoMoteur
 
 	void taskServoMoteur(void * unused){
-		xl320_init(&xl320, 1, BR_1M);
-		xl320_setSpeed(&xl320, 20);
-		xl320_torqueEnable(&xl320);
-		vTaskDelay(250);
-
 		for(;;){
-			xl320_setGoalPosition(&xl320, 20);
-			xl320_executeAction(&xl320);
+			xSemaphoreTake(sem_taskServo, portMAX_DELAY);
+			xl320_setGoalPosition(&xl320, 69);
+			// donner le sémaphore à la tache asserv
 			vTaskDelay(2000);
 			xl320_setGoalPosition(&xl320, 0);
-			xl320_executeAction(&xl320);
+			// donner le sémaphore à la tâche capteur de couleurs
 			vTaskDelay(2000);
 		}
 	}
 
-	if (xTaskCreate(taskServoMoteur, "Tâche Servo moteur", STACK_DEPTH, NULL, 3, NULL) != pdTRUE){
-		printf("TaskServoMoteur not created");
+	// Tâche du moteur
+
+	void taskMoteur(void * unused){
+		for (;;){
+
+		}
 	}
 
+	// Tâche de synchronisation
+
+	void taskSync(void * unused){
+		// Si la distance entre canette et capteur < valeur, alors on donne le sémaphore à la tâche ServoMoteur
+
+		//
+	}
+
+	// Tâche d'initialisation
+
+	void taskInit(void * unused){
+		if (xTaskCreate(taskMoteur, "Tache de synchronisation", STACK_MOTOR_SIZE, NULL, 2, NULL) != pdPASS){
+			printf("TaskSync not created");
+		}
+		if (xTaskCreate(taskServoMoteur, "Tache Servo moteur", STACK_SERVO_SIZE, NULL, 6, &h_taskServoMoteur) != pdPASS){
+			printf("TaskServoMoteur not created");
+		}
+	}
 
 	vTaskStartScheduler();
 
-  /* USER CODE END 2 */
+	/* USER CODE END 2 */
 
-  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+	/* Call init function for freertos objects (in freertos.c) */
+	MX_FREERTOS_Init();
 
-  /* Start scheduler */
-  osKernelStart();
+	/* Start scheduler */
+	osKernelStart();
 
-  /* We should never get here as control is now taken by the scheduler */
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+	/* We should never get here as control is now taken by the scheduler */
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
 
 
-    /* USER CODE END WHILE */
+		/* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+		/* USER CODE BEGIN 3 */
 	}
-  /* USER CODE END 3 */
+	/* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage
-  */
-  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+	/** Configure the main internal regulator output voltage
+	 */
+	HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
+	RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+			|RCC_CLOCKTYPE_PCLK1;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 /* USER CODE BEGIN 4 */
@@ -201,33 +255,33 @@ void SystemClock_Config(void)
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
+	/* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
 	while (1)
 	{
 	}
-  /* USER CODE END Error_Handler_Debug */
+	/* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
+	/* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
+	/* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

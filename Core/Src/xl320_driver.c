@@ -102,7 +102,7 @@ int xl320_sendCommand(XL320_t* xl320, XL320_Instruction_t inst, uint16_t nbParam
 }
 
 int xl320_receiveCommand(XL320_t* xl320, uint8_t* rxBuff){
-	xl320->serial.receive(rxBuff, BUFFER_SIZE, TIMEOUT);
+	xl320->serial.receive(rxBuff, BUFFER_SERVO_SIZE, 0x1F4);
 
 	return 0;
 }
@@ -156,7 +156,7 @@ int xl320_check_crcField(uint8_t* buffer){
 }
 
 int xl320_ping(XL320_t* xl320){
-	char rxBuff[BUFFER_SIZE] = {0};
+	char rxBuff[BUFFER_SERVO_SIZE] = {0};
 
 	xl320_sendCommand(xl320, PING, 0, NULL);
 	xl320_receiveCommand(xl320, (uint8_t*) &rxBuff);
@@ -167,7 +167,7 @@ int xl320_ping(XL320_t* xl320){
 }
 
 int xl320_reboot(XL320_t* xl320){
-	char rxBuff[BUFFER_SIZE] = {0};
+	char rxBuff[BUFFER_SERVO_SIZE] = {0};
 
 	xl320_sendCommand(xl320, REBOOT, 0, NULL);
 	xl320_receiveCommand(xl320, (uint8_t*) &rxBuff);
@@ -225,24 +225,31 @@ int xl320_torqueEnable(XL320_t* xl320){
 
 
 int xl320_readCurrent(XL320_t* xl320){
-	char rxBuff[BUFFER_SIZE] = {0};
+	char rxBuff[READ_BUFFER_SIZE] = {0};
 
-	uint8_t params[2] = {CURRENT, 0};
+	uint8_t params[4] = {CURRENT, 0, NB_PARAM_READ, 0};
 
-	xl320_sendCommand(xl320, READ, 2, (uint8_t*) &params);
+	xl320_sendCommand(xl320, READ, 4, (uint8_t*) &params);
 	xl320_receiveCommand(xl320, (uint8_t*) &rxBuff);
 
-	if (rxBuff[10] == 1){
-
-		printf("Current : + A");
-	}
-	else{
-		printf("Current : - A");
-	}
+	printf("Param1 = %d, Param2 = %d, Param3 = %d, Param4 = %d", rxBuff[9], rxBuff[10], rxBuff[11], rxBuff[12]);
 
 	return 0;
 }
 
+int xl320_factoryReboot(XL320_t* xl320, XL320_Reset_Options_t rst_opt){
+	char rxBuff[11] = {0};
+
+	uint8_t params[1] = {rst_opt};
+
+	xl320_sendCommand(xl320, FACTORY_RESET, 1, (uint8_t*) &params);
+	xl320_receiveCommand(xl320, (uint8_t*) &rxBuff);
+
+	printf("Réinitialisation complétée, ID = 1 et BR = 1M\r\n");
+	printf("%d", rxBuff[7]);
+
+	return 0;
+}
 
 
 int xl320_blinbling(XL320_t* xl320){

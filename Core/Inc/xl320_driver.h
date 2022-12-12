@@ -34,8 +34,10 @@
 #define RESOLUTION_SPEED 		0.111
 #define LIMIT_SPEED 			114
 #define GATE_CLOSED 			69
-#define BUFFER_SIZE				64
-#define TIMEOUT					0x1F4
+#define BUFFER_SERVO_SIZE				14
+#define READ_BUFFER_SIZE		15
+#define CURRENT_RESOLUTION		0.001
+#define NB_PARAM_READ			4
 
 /*
  * FRAME SIZE
@@ -61,11 +63,12 @@ typedef enum baudRate_struct{
  * INSTRUCTIONS
  */
 typedef enum xl320_instruction_struct{
-	PING 		=	0x01,
-	READ		=	0x02,
-	WRITE 		= 	0x03,
-	ACTION 		= 	0x05,
-	REBOOT 		= 	0x08
+	PING 				=	0x01,
+	READ				=	0x02,
+	WRITE 				= 	0x03,
+	ACTION 				= 	0x05,
+	FACTORY_RESET		=	0x06,
+	REBOOT 				= 	0x08
 }XL320_Instruction_t;
 
 
@@ -94,6 +97,14 @@ typedef enum xl320_register_struct{
 	CURRENT		=	0x29
 }XL320_Register_t;
 
+/*
+ * FACTORY RESET OPTIONS
+ */
+typedef enum xl320_reset_option{
+	RST_ALL 			= 	0xFF,
+	RST_EXCEPT_ID 		= 	0x01,
+	RST_EXCEPT_ID_BR 	= 	0x02
+}XL320_Reset_Options_t;
 
 /*
  * LED COLORS
@@ -212,6 +223,11 @@ int xl320_sendCommand(XL320_t* xl320, uint8_t inst, uint16_t nbParams, uint8_t* 
 
 /**
  * @fn xl320_receiveCommand(XL320_t* xl320, uint8_t* rxBuff)
+ *
+ * @brief Receive data from the corresponding XL320
+ *
+ * @param xl320		XL320 device
+ * @param rxBuff	Buffer in which the receive data will be copied
  */
 int xl320_receiveCommand(XL320_t* xl320, uint8_t* rxBuff);
 
@@ -225,17 +241,69 @@ int xl320_reboot(XL320_t* xl320);
 
 int xl320_setLedColor(XL320_t* xl320, XL320_Color_t color);
 
+/**
+ * @fn xl320_setGoalPosition(XL320_t* xl320, float goalPositionInDeg)
+ *
+ * @brief Set the position to be reached by the corresponding XL320
+ *
+ * @param xl320					XL320 device
+ * @param goalPositionInDeg		The position to be reached in degree
+ */
+
 int xl320_setGoalPosition(XL320_t* xl320, float goalPositionInDeg);
 
+/**
+ * @fn xl320_setSpeed(XL320_t* xl320, float rpm)
+ *
+ * @brief Set the speed to be reached by the corresponding XL320
+ *
+ * @param xl320			XL320 device
+ * @param rpm			Rotational speed in revolutions per minute
+ */
+
 int xl320_setSpeed(XL320_t* xl320, float rpm);
+
+/**
+ * @fn xl320_executeAction(XL320_t* xl320)
+ *
+ * @brief Instruction that executes the paquet that has been registrated using the Reg Write Instruction
+ *
+ * @param xl320			XL320 device
+ */
 
 int xl320_executeAction(XL320_t* xl320);
 
+/**
+ * @fn xl320_torqueEnable(XL320_t* xl320)
+ *
+ * @brief Enables the torque by writing a 1 in the register
+ *
+ * @param xl320			XL320 device
+ */
+
 int xl320_torqueEnable(XL320_t* xl320);
 
-int xl320_setSpeed(XL320_t* xl320, float rpm);
+/**
+ * @fn xl320_readCurrent(XL320_t* xl320)
+ *
+ * @brief Reading the current at a given moment
+ * The value of the current is obtained on 2 bits which must be converted to obtain a usable measurement
+ *
+ * @param xl320			XL320 device
+ */
 
 int xl320_readCurrent(XL320_t* xl320);
+
+/**
+ * @fn xl320_factoryReboot(XL320_t* xl320)
+ *
+ * @brief Instruction that resets the Control Table to its initial factory default settings which are 1 for the ID number and 1M for the Baud Rate.
+ *
+ * @param xl320			XL320 device
+ * @param rst_opt
+ */
+
+int xl320_factoryReboot(XL320_t* xl320, XL320_Reset_Options_t rst_opt);
 
 int xl320_blinbling(XL320_t* xl320);
 
