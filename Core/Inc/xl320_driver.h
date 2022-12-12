@@ -290,6 +290,8 @@ int xl320_torqueEnable(XL320_t* xl320);
  * The value of the current is obtained on 2 bits which must be converted to obtain a usable measurement
  *
  * @param xl320			XL320 device
+ *
+ * @return current		Return the value of the current
  */
 
 int xl320_readCurrent(XL320_t* xl320);
@@ -300,7 +302,7 @@ int xl320_readCurrent(XL320_t* xl320);
  * @brief Instruction that resets the Control Table to its initial factory default settings which are 1 for the ID number and 1M for the Baud Rate.
  *
  * @param xl320			XL320 device
- * @param rst_opt
+ * @param rst_opt		Option for the reset
  */
 
 int xl320_factoryReboot(XL320_t* xl320, XL320_Reset_Options_t rst_opt);

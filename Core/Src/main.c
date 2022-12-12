@@ -144,23 +144,28 @@ int main(void)
 	xl320_init(&xl320, 1, BR_1M);
 	xl320_setSpeed(&xl320, 20);
 	xl320_torqueEnable(&xl320);
+	xl320_setGoalPosition(&xl320, 0);
 
 	// Tâche du ServoMoteur
 
 	void taskServoMoteur(void * unused){
 		for(;;){
-			xSemaphoreTake(sem_taskServo, portMAX_DELAY);
+			//xSemaphoreTake(sem_taskServo, portMAX_DELAY);
 			xl320_setGoalPosition(&xl320, 69);
 			// donner le sémaphore à la tache asserv
-			vTaskDelay(2000);
+			vTaskDelay(1000);
 			xl320_setGoalPosition(&xl320, 0);
 			// donner le sémaphore à la tâche capteur de couleurs
-			vTaskDelay(2000);
+			vTaskDelay(1000);
 		}
 	}
 
-	// Tâche du moteur
+	if (xTaskCreate(taskServoMoteur, "Tache Servo moteur", STACK_SERVO_SIZE, NULL, 6, &h_taskServoMoteur) != pdPASS){
+		printf("TaskServoMoteur not created");
+	}
 
+	// Tâche du moteur
+	/*
 	void taskMoteur(void * unused){
 		for (;;){
 
@@ -174,9 +179,9 @@ int main(void)
 
 		//
 	}
-
+	 */
 	// Tâche d'initialisation
-
+	/*
 	void taskInit(void * unused){
 		if (xTaskCreate(taskMoteur, "Tache de synchronisation", STACK_MOTOR_SIZE, NULL, 2, NULL) != pdPASS){
 			printf("TaskSync not created");
@@ -185,7 +190,7 @@ int main(void)
 			printf("TaskServoMoteur not created");
 		}
 	}
-
+	 */
 	vTaskStartScheduler();
 
 	/* USER CODE END 2 */
